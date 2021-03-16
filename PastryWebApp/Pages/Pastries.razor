@@ -1,0 +1,205 @@
+﻿@page   "/pastries"
+
+@inject NavigationManager NavigationManager
+@inject PastryDbContext ctx
+
+<h3>Pastries</h3>
+
+<div>
+    <table class="table-bordered">
+        <tr>
+            <td>
+                <label>New Pastry Name:</label>
+                <input type="text" @bind-value="_newPastry.Name" />
+            </td>
+            <td>
+                <label>Quantity produced:</label>
+                <input type="number" @bind-value="_newPastry.Quantity" />
+            </td>
+            <td>
+                <label>Production date:</label>
+                <input type="date" @bind-value="_newPastry.ProductionDate" />
+            </td>
+            <td>
+                <button @onclick="() => AddPastry()">
+                    <span class="oi oi-plus" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+<br />
+<div>
+    <p>List:</p>
+    <table class="table">
+        <td>Name</td>
+        <td>Quantity</td>
+        <td>Production Date</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        @foreach (var pastry in @_pastries)
+        {
+            <tr>
+                <td>@pastry.Name</td>
+                <td>@pastry.Quantity</td>
+                <td>@pastry.ProductionDate.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => OpenEditPopup(pastry)">
+                        Edit Pastry
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => NavigateToIngredients(pastry.Id)">
+                        View/Edit Recipe
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => AskDeleteConfirmation(pastry)">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
+    </table>
+
+</div>
+
+@if (_showEditPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Edit Pastry</h3>
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <label>Name:</label>
+                    <input class="form-control" type="text"
+                           placeholder="Name"
+                           @bind="_editingPastry.Name" />
+                    <br />
+                    <label>Quantity:</label>
+                    <input class="form-control" type="date"
+                           placeholder="Production Date"
+                           @bind="_editingPastry.ProductionDate" />
+                    <br />
+                    <label>Production Date:</label>
+                    <input class="form-control" type="number"
+                           placeholder="Quantity produced"
+                           @bind="_editingPastry.Quantity" />
+                    <br />
+                    <br />
+                    <button class="btn btn-primary"
+                            @onclick="SaveAndClose">
+                        Save
+                    </button>
+                    <button class="btn btn-primary"
+                            @onclick="ClosePopup">
+                        Discard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_showDeletePopup)
+{
+    <ConfirmationComponent ConfirmationQuest="@_deletePastryMessage"
+                           Argument="@_pastryToDelete"
+                           Result="@OnDeleteConfirmation" />
+}
+
+@code {
+
+    PastryWebApp.Database.Entities.Pastry _newPastry;
+    List<PastryWebApp.Database.Entities.Pastry> _pastries;
+    PastryWebApp.Database.Entities.Pastry _editingPastry;
+    PastryDal _dal;
+    EventCallback<bool> DeletePastryEvent;
+    Pastry _pastryToDelete;
+    bool _showEditPopup;
+    bool _showDeletePopup;
+    string _deletePastryMessage;
+
+
+    protected override void OnInitialized()
+    {
+        _newPastry = new Database.Entities.Pastry();
+        _dal = new PastryDal(ctx);
+        ClosePopup();
+        base.OnInitialized();
+        LoadPastries();
+        PrepareNewPastry();
+    }
+
+    protected void LoadPastries()
+    {
+        _pastries = _dal.GetAll();
+    }
+
+    protected void PrepareNewPastry()
+    {
+        _newPastry = new Database.Entities.Pastry();
+        _newPastry.ProductionDate = DateTime.Now;
+    }
+
+    protected void AddPastry()
+    {
+        if (string.IsNullOrEmpty(_newPastry.Name) || _newPastry.Quantity == 0)
+            return;
+        _pastries.Add(_newPastry);
+        _dal.Add(_newPastry);
+        PrepareNewPastry();
+    }
+
+
+    protected void OpenEditPopup(PastryWebApp.Database.Entities.Pastry pastry)
+    {
+        _showEditPopup = true;
+        _editingPastry = new Pastry { Id = pastry.Id, Name = pastry.Name, ProductionDate = pastry.ProductionDate, Ingredients = pastry.Ingredients };
+    }
+
+    protected void SaveAndClose()
+    {
+        _dal.Update(_editingPastry);
+        var item = _pastries.Where(p => p.Id == _editingPastry.Id).First();
+        item = _editingPastry;
+        ClosePopup();
+    }
+
+    protected void ClosePopup()
+    {
+        _showEditPopup = false;
+
+    }
+    private void AskDeleteConfirmation(Pastry pastry)
+    {
+        _pastryToDelete = pastry;
+        _deletePastryMessage = $"Delete {pastry.Name}?";
+        _showDeletePopup = true;
+    }
+
+    private void OnDeleteConfirmation(bool result)
+    {
+        if (result)
+        {
+            _dal.Delete(_pastryToDelete);
+            _pastries.Remove(_pastryToDelete);
+        }
+        _showDeletePopup = false;
+    }
+
+
+    private void NavigateToIngredients(int pastryId)
+    {
+        NavigationManager.NavigateTo($"/ingredients/{pastryId}");
+    }
+
+}

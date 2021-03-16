@@ -1,0 +1,211 @@
+﻿@page "/ingredients/{PastryId}"
+
+@inject NavigationManager NavigationManager
+@inject PastryDbContext ctx
+
+@if (_pastry == null)
+{
+    <h1>Richiesta non corretta</h1>
+}
+else
+{
+    <h3>@_pastryName: Ingredienti</h3>
+    <br />
+    <br />
+    <p>Add Ingredient</p>
+    <div>
+        <table class="table-bordered">
+            <tr>
+                <td>
+                    <label>Name:</label>
+                    <input type="text" @onkeyup="@OnEnter" @bind-value="_newIngredient.Name" />
+                </td>
+                <td>
+                    <label>Quantity:</label>
+                    <input type="number" @onkeyup="@OnEnter" @bind-value="_newIngredient.Quantity" />
+                </td>
+                <td>
+                    <label>Measure Unit:</label>
+                    <input type="text" @onkeyup="@OnEnter" @bind-value="_newIngredient.MeasureUnit" />
+                </td>
+                <td>
+                    <input type="button" value="Add" @onclick="() => OnAddIngredient()" />
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <br />
+    <br />
+    <table class="table">
+        <tr>
+            <td>
+                <div>Nome</div>
+            </td>
+            <td>
+                <div>Quantità</div>
+            </td>
+            <td>
+                <div></div>
+            </td>
+        </tr>
+        @foreach (var ingredient in @_ingredients)
+        {
+
+    <tr>
+        <td>@ingredient.Name</td>
+        <td>@ingredient.Quantity @ingredient.MeasureUnit</td>
+        <td>
+            <button class="btn btn-primary" @onclick="() => OpenEditPopup(ingredient)">
+                Edit Pastry
+            </button>
+        </td>
+        <td>
+            <input type="button" value="Remove" @onclick="() => AskDeleteConfirmation(ingredient)" />
+        </td>
+    </tr>
+        }
+    </table>
+
+    @if (_showEditPopup)
+    {
+        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+            <div class="modal-dia
+             log">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Edit Pastry</h3>
+                        <button type="button" class="close"
+                                @onclick="ClosePopup">
+                            <span aria-hidden="true">X</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <label>Name:</label>
+                        <input class="form-control" type="text"
+                               placeholder="Name"
+                               @bind="_editingIngredient.Name" />
+                        <br />
+                        <label>Quantity:</label>
+                        <input class="form-control" type="number"
+                               placeholder="Quantità"
+                               @bind="_editingIngredient.Quantity" />
+                        <br />
+                        <label>Production Date:</label>
+                        <input class="form-control" type="number"
+                               placeholder="Unità di misura"
+                               @bind="_editingIngredient.MeasureUnit" />
+                        <br />
+                        <br />
+                        <button class="btn btn-primary"
+                                @onclick="SaveAndClose">
+                            Save
+                        </button>
+                        <button class="btn btn-primary"
+                                @onclick="ClosePopup">
+                            Discard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (_showDeletePopup)
+    {
+        <ConfirmationComponent ConfirmationQuest="@_deleteIngredientMessage"
+                               Argument="@_ingredientToDelete"
+                               Result="@OnDeleteConfirmation" />
+    }
+}
+
+@code {
+
+    [Parameter]
+    public string PastryId { get; set; }
+    Pastry _pastry;
+    PastryDbContext _ctx;
+    IngredientsDal _dal;
+    Ingredient _newIngredient;
+    Ingredient _editingIngredient;
+    Ingredient _ingredientToDelete;
+    List<Ingredient> _ingredients;
+    string _pastryName;
+    bool _showEditPopup;
+    bool _showDeletePopup;
+    string _deleteIngredientMessage;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        int pastryId;
+        if (Int32.TryParse(PastryId, out pastryId))
+        {
+            _dal = new IngredientsDal(ctx);
+            _newIngredient = new Ingredient();
+            _ingredients = new List<Ingredient>();
+            var pastryDal = new PastryDal(ctx);
+            _pastry = pastryDal.GetPastryById(pastryId);
+            if (_pastry != null)
+            {
+                _pastryName = _pastry.Name;
+                _ingredients = _dal.GetIngredientsByPastry(_pastry.Id);
+                return;
+            }
+        }
+    }
+
+    protected void OnAddIngredient()
+    {
+        if (string.IsNullOrEmpty(_newIngredient.Name) || string.IsNullOrEmpty(_newIngredient.MeasureUnit) || _newIngredient.Quantity == 0)
+            return;
+        _newIngredient.PastryId = _pastry.Id;
+        _dal.Add(_newIngredient);
+        _ingredients.Add(_newIngredient);
+        _newIngredient = new Ingredient();
+    }
+
+    protected void OnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == ConsoleKey.Enter.ToString())
+            OnAddIngredient();
+    }
+
+    protected void OpenEditPopup(Ingredient ingredient)
+    {
+        _showEditPopup = true;
+        _editingIngredient = new Ingredient { Id = ingredient.Id, Name = ingredient.Name, Quantity = ingredient.Quantity, PastryId = ingredient.PastryId};
+    }
+
+    protected void SaveAndClose()
+    {
+        _dal.Update(_editingIngredient);
+        var item = _ingredients.Where(p => p.Id == _editingIngredient.Id).First();
+        item = _editingIngredient;
+        ClosePopup();
+    }
+
+    protected void ClosePopup()
+    {
+        _showEditPopup = false;
+
+    }
+
+    private void AskDeleteConfirmation(Ingredient ingredient)
+    {
+        _ingredientToDelete = ingredient;
+        _deleteIngredientMessage = $"Delete {ingredient.Name}?";
+        _showDeletePopup = true;
+    }
+
+    protected void OnDeleteConfirmation(bool result)
+    {
+        if (result)
+        {
+            _dal.Delete(_ingredientToDelete);
+            _ingredients.Remove(_ingredientToDelete);
+        }
+        _showDeletePopup = false;
+    }
+}
