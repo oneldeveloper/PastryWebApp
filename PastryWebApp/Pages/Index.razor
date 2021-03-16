@@ -1,7 +1,55 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@inject PastryDbContext ctx
 
-Welcome to your new app.
+<h1>I nostri dolci in vetrina</h1>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<table class="table-borderless">
+    <tr>
+        <td>Nome</td>
+        <td>Quantità</td>
+        <td>Sconto</td>
+    </tr>
+
+        @foreach (var pastry in _pastries)
+        {
+
+            <tr>
+                @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(4))
+                {
+                    <td>@pastry.Name</td>
+                    <td>@pastry.Quantity</td>
+                    @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(1))
+                    {
+                        <td></td>
+                    }
+                    else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(2))
+                    {
+                        <td>-20%</td>
+                    }
+                    else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
+                    {
+                        <td>-50%</td>
+                    }
+                    <td>Ingredienti</td>
+                }
+            </tr>
+        }
+</table>
+
+
+@code
+{
+    List<Pastry> _pastries;
+    PastryDal _dal;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _dal = new PastryDal(ctx);
+        _pastries = _dal.GetAll();
+
+    }
+
+}
+

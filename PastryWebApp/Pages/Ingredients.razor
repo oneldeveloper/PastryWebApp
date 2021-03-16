@@ -1,5 +1,7 @@
 ﻿@page "/ingredients/{PastryId}"
 
+@attribute [Authorize]
+
 @inject NavigationManager NavigationManager
 @inject PastryDbContext ctx
 
@@ -52,18 +54,18 @@ else
         @foreach (var ingredient in @_ingredients)
         {
 
-    <tr>
-        <td>@ingredient.Name</td>
-        <td>@ingredient.Quantity @ingredient.MeasureUnit</td>
-        <td>
-            <button class="btn btn-primary" @onclick="() => OpenEditPopup(ingredient)">
-                Edit Pastry
-            </button>
-        </td>
-        <td>
-            <input type="button" value="Remove" @onclick="() => AskDeleteConfirmation(ingredient)" />
-        </td>
-    </tr>
+            <tr>
+                <td>@ingredient.Name</td>
+                <td>@ingredient.Quantity @ingredient.MeasureUnit</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => OpenEditPopup(ingredient)">
+                        Edit Pastry
+                    </button>
+                </td>
+                <td>
+                    <input type="button" value="Remove" @onclick="() => AskDeleteConfirmation(ingredient)" />
+                </td>
+            </tr>
         }
     </table>
 
@@ -175,7 +177,7 @@ else
     protected void OpenEditPopup(Ingredient ingredient)
     {
         _showEditPopup = true;
-        _editingIngredient = new Ingredient { Id = ingredient.Id, Name = ingredient.Name, Quantity = ingredient.Quantity, PastryId = ingredient.PastryId};
+        _editingIngredient = new Ingredient { Id = ingredient.Id, Name = ingredient.Name, Quantity = ingredient.Quantity, PastryId = ingredient.PastryId };
     }
 
     protected void SaveAndClose()

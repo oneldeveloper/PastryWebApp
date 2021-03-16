@@ -34,10 +34,17 @@ namespace PastryWebApp
         {
             services.AddDbContext<PastryDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("PastryDatabase")));
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(Configuration.GetConnectionString("IdentityDatabase")));
+
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<AppDbContext>();
+
+            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
-            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
