@@ -17,6 +17,11 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="wwwroot\Resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Resources\PastryImage.png" />
   </ItemGroup>
 
 </Project>

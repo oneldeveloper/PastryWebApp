@@ -1,54 +1,122 @@
 ﻿@page "/"
 
 @inject PastryDbContext ctx
-
-<h1>I nostri dolci in vetrina</h1>
-
-<table class="table-borderless">
-    <tr>
-        <td>Nome</td>
-        <td>Quantità</td>
-        <td>Sconto</td>
-    </tr>
+<div>
+    <div min>
+        <h1 class="text-center">I nostri dolci in vetrina</h1>
+    </div>
+    <table class="table">
+        <tr class="card-header">
+            <td class="text-center">Nome</td>
+            <td class="text-center">Quantità</td>
+            <td></td>
+            <td class="text-center">Sconto</td>
+        </tr>
 
         @foreach (var pastry in _pastries)
         {
 
-            <tr>
-                @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(4))
-                {
-                    <td>@pastry.Name</td>
-                    <td>@pastry.Quantity</td>
-                    @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(1))
-                    {
-                        <td></td>
-                    }
-                    else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(2))
-                    {
-                        <td>-20%</td>
-                    }
-                    else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
-                    {
-                        <td>-50%</td>
-                    }
-                    <td>Ingredienti</td>
-                }
-            </tr>
+    <tr class="card-body">
+        @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
+        {
+            <td class="text-center">@pastry.Name</td>
+            <td class="text-center">@pastry.Quantity</td>
+            @if (pastry.Ingredients != null && pastry.Ingredients.Count > 0)
+            {
+                <td>
+                    <button class="btn btn-primary" @onclick="() => OpenIngredientsPopup(pastry)">
+                        Ingredienti
+                    </button>
+                </td>
+            }
+            else
+            {
+                <td></td>
+            }
+            @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(1))
+            {
+                <td></td>
+            }
+            else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(2))
+            {
+                <td class="text-center"><h3 class="text-danger">-20%</h3></td>
+            }
+            else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
+            {
+                <td class="text-center"><h3 class="text-danger">-50%</h3></td>
+            }
+            else
+            {
+                <td></td>
+            }
+
+
         }
-</table>
+    </tr>
+        }
+    </table>
+</div>
+@if (_showIngredientsPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">@_selectedPastry.Name: ingredienti</h3>
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
 
-
+                <div class="modal-body">
+                    <br />
+                    @foreach (var ingredient in _ingredients)
+                    {
+                         <p>@ingredient.Name: @ingredient.Quantity @ingredient.MeasureUnit</p>
+                    }
+                    <br />
+                    <br />
+                    <button class="btn btn-primary"
+                            @onclick="ClosePopup">
+                        Chiudi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 @code
 {
     List<Pastry> _pastries;
-    PastryDal _dal;
+    Pastry _selectedPastry;
+    List<Ingredient> _ingredients;
+    PastryDal _dalPastry;
+    IngredientsDal _dalIngredients;
+    bool _showIngredientsPopup;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _dal = new PastryDal(ctx);
-        _pastries = _dal.GetAll();
+        _dalPastry = new PastryDal(ctx);
+        _dalIngredients = new IngredientsDal(ctx);
+        _pastries = _dalPastry.GetAll();
+        foreach (var pastry in _pastries)
+            pastry.Ingredients = _dalIngredients.GetIngredientsByPastry(pastry.Id);
 
+    }
+
+    protected void OpenIngredientsPopup(Pastry pastry)
+    {
+        _selectedPastry = pastry;
+        _ingredients = pastry.Ingredients;
+
+        _showIngredientsPopup = true;
+    }
+
+    protected void ClosePopup()
+    {
+        _showIngredientsPopup = false;
     }
 
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PastryWebApp.Database.Dal
 {
-    public class PastryDal
+    public class PastryDal : IDisposable
     {
         private PastryDbContext _ctx;
 
@@ -51,6 +51,10 @@ namespace PastryWebApp.Database.Dal
             _ctx.Pastries.Remove(pastry);
             _ctx.SaveChanges();
         }
-        
+
+        public void Dispose()
+        {
+            _ctx.Dispose();
+        }
     }
 }

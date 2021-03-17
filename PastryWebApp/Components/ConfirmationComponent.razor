@@ -2,7 +2,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Confirm</h3>
+                    <h3 class="modal-title">Conferma</h3>
                     <button type="button" class="close"
                             @onclick="@(() => Result.InvokeAsync(false))">
                         <span aria-hidden="true">X</span>
@@ -14,11 +14,11 @@
                     <br />
                     <button class="btn btn-primary"
                             @onclick="@(() => Result.InvokeAsync(true))">
-                        Confirm
+                        Si
                     </button>
                     <button class="btn btn-primary"
                             @onclick="@(() => Result.InvokeAsync(false))">
-                        Discard
+                        No
                     </button>
                 </div>
             </div>

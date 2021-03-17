@@ -7,31 +7,33 @@
 
 @if (_pastry == null)
 {
-    <h1>Richiesta non corretta</h1>
+    <h1 class="text-center">Richiesta non corretta</h1>
 }
 else
 {
-    <h3>@_pastryName: Ingredienti</h3>
+    <h1 class="text-center">@_pastryName: Ingredienti</h1>
     <br />
     <br />
-    <p>Add Ingredient</p>
     <div>
-        <table class="table-bordered">
-            <tr>
+        <h3>Aggiungi ingrediente</h3>
+        <table class="table">
+            <tr class="card-header">
                 <td>
-                    <label>Name:</label>
+                    <label>Nome:</label>
                     <input type="text" @onkeyup="@OnEnter" @bind-value="_newIngredient.Name" />
                 </td>
                 <td>
-                    <label>Quantity:</label>
+                    <label>Quantità:</label>
                     <input type="number" @onkeyup="@OnEnter" @bind-value="_newIngredient.Quantity" />
                 </td>
                 <td>
-                    <label>Measure Unit:</label>
+                    <label>Unità di misura:</label>
                     <input type="text" @onkeyup="@OnEnter" @bind-value="_newIngredient.MeasureUnit" />
                 </td>
                 <td>
-                    <input type="button" value="Add" @onclick="() => OnAddIngredient()" />
+                    <button class="btn btn-primary" @onclick="() => AddIngredient()">
+                        <span class="oi oi-plus" aria-hidden="true"></span>
+                    </button>
                 </td>
             </tr>
         </table>
@@ -39,44 +41,43 @@ else
 
     <br />
     <br />
-    <table class="table">
-        <tr>
-            <td>
-                <div>Nome</div>
-            </td>
-            <td>
-                <div>Quantità</div>
-            </td>
-            <td>
-                <div></div>
-            </td>
-        </tr>
-        @foreach (var ingredient in @_ingredients)
-        {
-
-            <tr>
-                <td>@ingredient.Name</td>
-                <td>@ingredient.Quantity @ingredient.MeasureUnit</td>
-                <td>
-                    <button class="btn btn-primary" @onclick="() => OpenEditPopup(ingredient)">
-                        Edit Pastry
-                    </button>
-                </td>
-                <td>
-                    <input type="button" value="Remove" @onclick="() => AskDeleteConfirmation(ingredient)" />
-                </td>
+    <div>
+        <h3>Lista ingredienti:</h3>
+        <table class="table">
+            <tr class="card-header">
+                <td class="text-center">Nome</td>
+                <td class="text-center">Quantità</td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
-        }
-    </table>
+            @foreach (var ingredient in @_ingredients)
+            {
+                <tr>
+                    <td class="text-center">@ingredient.Name</td>
+                    <td class="text-center">@ingredient.Quantity @ingredient.MeasureUnit</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary" @onclick="() => OpenEditPopup(ingredient)">
+                            Edita
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary" @onclick="() => AskDeleteConfirmation(ingredient)">
+                            <span class="oi oi-minus" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
 
     @if (_showEditPopup)
     {
         <div class="modal" tabindex="-1" style="display:block" role="dialog">
-            <div class="modal-dia
-             log">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 class="modal-title">Edit Pastry</h3>
+                        <h3 class="modal-title">Edita ingrediente</h3>
                         <button type="button" class="close"
                                 @onclick="ClosePopup">
                             <span aria-hidden="true">X</span>
@@ -84,29 +85,29 @@ else
                     </div>
 
                     <div class="modal-body">
-                        <label>Name:</label>
+                        <label>Nome:</label>
                         <input class="form-control" type="text"
                                placeholder="Name"
                                @bind="_editingIngredient.Name" />
                         <br />
-                        <label>Quantity:</label>
+                        <label>Quantità:</label>
                         <input class="form-control" type="number"
                                placeholder="Quantità"
                                @bind="_editingIngredient.Quantity" />
                         <br />
-                        <label>Production Date:</label>
-                        <input class="form-control" type="number"
+                        <label>Unità di misuras:</label>
+                        <input class="form-control" type="text"
                                placeholder="Unità di misura"
                                @bind="_editingIngredient.MeasureUnit" />
                         <br />
                         <br />
                         <button class="btn btn-primary"
                                 @onclick="SaveAndClose">
-                            Save
+                            Salva
                         </button>
                         <button class="btn btn-primary"
                                 @onclick="ClosePopup">
-                            Discard
+                            Annulla
                         </button>
                     </div>
                 </div>
@@ -127,7 +128,6 @@ else
     [Parameter]
     public string PastryId { get; set; }
     Pastry _pastry;
-    PastryDbContext _ctx;
     IngredientsDal _dal;
     Ingredient _newIngredient;
     Ingredient _editingIngredient;
@@ -158,7 +158,7 @@ else
         }
     }
 
-    protected void OnAddIngredient()
+    protected void AddIngredient()
     {
         if (string.IsNullOrEmpty(_newIngredient.Name) || string.IsNullOrEmpty(_newIngredient.MeasureUnit) || _newIngredient.Quantity == 0)
             return;
@@ -171,7 +171,7 @@ else
     protected void OnEnter(KeyboardEventArgs e)
     {
         if (e.Key == ConsoleKey.Enter.ToString())
-            OnAddIngredient();
+            AddIngredient();
     }
 
     protected void OpenEditPopup(Ingredient ingredient)
@@ -197,7 +197,7 @@ else
     private void AskDeleteConfirmation(Ingredient ingredient)
     {
         _ingredientToDelete = ingredient;
-        _deleteIngredientMessage = $"Delete {ingredient.Name}?";
+        _deleteIngredientMessage = $"Rimuovi {ingredient.Name}?";
         _showDeletePopup = true;
     }
 

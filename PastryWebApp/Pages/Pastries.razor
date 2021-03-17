@@ -3,26 +3,28 @@
 @attribute [Authorize]
 @inject NavigationManager NavigationManager
 @inject PastryDbContext ctx
+<br />
 
-<h3>Pastries</h3>
+<h1 class="text-center">Gestisci prodotti</h1>
 
 <div>
-    <table class="table-bordered">
-        <tr>
+    <h3>Inserisci nuovo prodotto</h3>
+    <table class="table">
+        <tr class="card-header">
             <td>
-                <label>New Pastry Name:</label>
+                <label>Nome:</label>
                 <input type="text" @bind-value="_newPastry.Name" />
             </td>
             <td>
-                <label>Quantity produced:</label>
+                <label>Quantità prodotta:</label>
                 <input type="number" @bind-value="_newPastry.Quantity" />
             </td>
             <td>
-                <label>Production date:</label>
+                <label>Data produzione:</label>
                 <input type="date" @bind-value="_newPastry.ProductionDate" />
             </td>
             <td>
-                <button @onclick="() => AddPastry()">
+                <button class="btn btn-primary" @onclick="() => AddPastry()">
                     <span class="oi oi-plus" aria-hidden="true"></span>
                 </button>
             </td>
@@ -30,34 +32,54 @@
     </table>
 </div>
 <br />
+<br />
 <div>
-    <p>List:</p>
+    <h3>Lista prodotti in vetrina:</h3>
     <table class="table">
-        <td>Name</td>
-        <td>Quantity</td>
-        <td>Production Date</td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <tr class="card-header">
+            <td class="text-center">Nome</td>
+            <td class="text-center">Quantità</td>
+            <td class="text-center">Data produzione</td>
+            <td class="text-center">Condizioni di vendita</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
         @foreach (var pastry in @_pastries)
         {
             <tr>
-                <td>@pastry.Name</td>
-                <td>@pastry.Quantity</td>
-                <td>@pastry.ProductionDate.ToString("dd/MM/yyyy")</td>
+                <td class="text-center">@pastry.Name</td>
+                <td class="text-center">@pastry.Quantity</td>
+                <td class="text-center">@pastry.ProductionDate.ToString("dd/MM/yyyy")</td>
+                @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(1))
+                {
+                    <td class="text-center">Prezzo pieno</td>
+                }
+                else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(2))
+                {
+                    <td class="text-center">Scontato -20%</td>
+                }
+                else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
+                {
+                    <td class="text-center">Scontato 50%</td>
+                }
+                else
+                {
+                    <td class="text-center">Non più vendibile</td>
+                }
                 <td>
                     <button class="btn btn-primary" @onclick="() => OpenEditPopup(pastry)">
-                        Edit Pastry
+                        Edita
                     </button>
                 </td>
                 <td>
                     <button class="btn btn-primary" @onclick="() => NavigateToIngredients(pastry.Id)">
-                        View/Edit Recipe
+                        Ricetta
                     </button>
                 </td>
                 <td>
                     <button class="btn btn-primary" @onclick="() => AskDeleteConfirmation(pastry)">
-                        Delete
+                        <span class="oi oi-minus" aria-hidden="true"></span>
                     </button>
                 </td>
             </tr>
@@ -72,7 +94,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Edit Pastry</h3>
+                    <h3 class="modal-title">Edita prodotto</h3>
                     <button type="button" class="close"
                             @onclick="ClosePopup">
                         <span aria-hidden="true">X</span>
@@ -80,29 +102,30 @@
                 </div>
 
                 <div class="modal-body">
-                    <label>Name:</label>
+                    <label>Nome:</label>
                     <input class="form-control" type="text"
-                           placeholder="Name"
+                           placeholder="Nome"
                            @bind="_editingPastry.Name" />
                     <br />
-                    <label>Quantity:</label>
-                    <input class="form-control" type="date"
-                           placeholder="Production Date"
-                           @bind="_editingPastry.ProductionDate" />
-                    <br />
-                    <label>Production Date:</label>
+                    <label>Quantità:</label>
                     <input class="form-control" type="number"
-                           placeholder="Quantity produced"
+                           placeholder="Quantità prodotta"
                            @bind="_editingPastry.Quantity" />
+                    <br />
+                    <label>Data produzione:</label>
+                    <input class="form-control" type="date"
+                           placeholder="Data Produzione"
+                           @bind="_editingPastry.ProductionDate" />
                     <br />
                     <br />
                     <button class="btn btn-primary"
                             @onclick="SaveAndClose">
-                        Save
+                        Salva
                     </button>
+                    <span />
                     <button class="btn btn-primary"
                             @onclick="ClosePopup">
-                        Discard
+                        Anulla
                     </button>
                 </div>
             </div>
@@ -119,11 +142,10 @@
 
 @code {
 
-    PastryWebApp.Database.Entities.Pastry _newPastry;
-    List<PastryWebApp.Database.Entities.Pastry> _pastries;
-    PastryWebApp.Database.Entities.Pastry _editingPastry;
+    Pastry _newPastry;
+    List<Pastry> _pastries;
+    Pastry _editingPastry;
     PastryDal _dal;
-    EventCallback<bool> DeletePastryEvent;
     Pastry _pastryToDelete;
     bool _showEditPopup;
     bool _showDeletePopup;
@@ -164,14 +186,24 @@
     protected void OpenEditPopup(PastryWebApp.Database.Entities.Pastry pastry)
     {
         _showEditPopup = true;
-        _editingPastry = new Pastry { Id = pastry.Id, Name = pastry.Name, ProductionDate = pastry.ProductionDate, Ingredients = pastry.Ingredients };
+        _editingPastry = new Pastry
+        {
+            Id = pastry.Id,
+            Name = pastry.Name,
+            Quantity = pastry.Quantity,
+            ProductionDate = pastry.ProductionDate,
+            Ingredients = pastry.Ingredients
+        };
     }
 
     protected void SaveAndClose()
     {
         _dal.Update(_editingPastry);
         var item = _pastries.Where(p => p.Id == _editingPastry.Id).First();
-        item = _editingPastry;
+        item.Name = _editingPastry.Name;
+        item.Quantity = _editingPastry.Quantity;
+        item.ProductionDate = _editingPastry.ProductionDate;
+        item.Ingredients = _editingPastry.Ingredients;
         ClosePopup();
     }
 
@@ -183,7 +215,7 @@
     private void AskDeleteConfirmation(Pastry pastry)
     {
         _pastryToDelete = pastry;
-        _deletePastryMessage = $"Delete {pastry.Name}?";
+        _deletePastryMessage = $"Rimuovi {pastry.Name}?";
         _showDeletePopup = true;
     }
 

@@ -9,9 +9,17 @@ namespace PastryWebApp.Database.Entities
 {
     public class Pastry
     {
+        DateTime _productionDate;
         public int Id { get; set; }
         public string Name { get; set; }
-        public DateTime ProductionDate { get; set; }
+        public DateTime ProductionDate {
+            get {
+                return _productionDate.Date;
+            } set
+            {
+                _productionDate = value.Date;
+            }
+        }
 
         public int Quantity { get; set; }
 

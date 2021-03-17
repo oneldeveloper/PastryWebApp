@@ -11,7 +11,7 @@ namespace PastryWebApp.Database
 
         public static void Create(PastryDbContext context)
         {
-           //context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
         }
