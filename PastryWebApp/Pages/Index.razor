@@ -10,7 +10,7 @@
             <td class="text-center">Nome</td>
             <td class="text-center">Quantità</td>
             <td></td>
-            <td class="text-center">Sconto</td>
+            <td class="text-center">Prezzo</td>
         </tr>
 
         @foreach (var pastry in _pastries)
@@ -35,15 +35,15 @@
             }
             @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(1))
             {
-                <td></td>
+                <td class="text-center">@pastry.Price.ToString("N2") €</td>
             }
             else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(2))
             {
-                <td class="text-center"><h3 class="text-danger">-20%</h3></td>
+                <td class="text-center">@((pastry.Price/100*80).ToString("N2")) €</td>
             }
             else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
             {
-                <td class="text-center"><h3 class="text-danger">-50%</h3></td>
+                <td class="text-center">@((pastry.Price/100*20).ToString("N2")) €</td>
             }
             else
             {
@@ -73,7 +73,14 @@
                     <br />
                     @foreach (var ingredient in _ingredients)
                     {
-                         <p>@ingredient.Name: @ingredient.Quantity @ingredient.MeasureUnit</p>
+                        <p>
+                        @ingredient.Name                           
+                        @if (@ingredient.Quantity > 0)
+                        {
+                             @ingredient.Quantity.ToString("N0")
+                        }   
+                        @ingredient.MeasureUnit
+                                    </p>
                     }
                     <br />
                     <br />

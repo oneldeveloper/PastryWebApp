@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -20,10 +21,11 @@ namespace PastryWebApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private string _rootPath;
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
-
+            _rootPath = env.WebRootPath;
         }
 
         public IConfiguration Configuration { get; }
@@ -32,11 +34,13 @@ namespace PastryWebApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            string pastryDbPath = Path.Combine(_rootPath, Configuration.GetConnectionString("PastryDatabase"));
+            string appDbPath = Path.Combine(_rootPath, Configuration.GetConnectionString("IdentityDatabase"));
             services.AddDbContext<PastryDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("PastryDatabase")));
+                options.UseSqlite($"DataSource={pastryDbPath}"));
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("IdentityDatabase")));
+                options.UseSqlite($"DataSource={appDbPath}"));
 
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<AppDbContext>();

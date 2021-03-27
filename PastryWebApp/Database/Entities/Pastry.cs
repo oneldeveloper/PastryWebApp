@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PastryWebApp.Database.Entities
 {
-    public class Pastry
+    public class Pastry : IEntity
     {
         DateTime _productionDate;
         public int Id { get; set; }
@@ -22,6 +22,8 @@ namespace PastryWebApp.Database.Entities
         }
 
         public int Quantity { get; set; }
+
+        public decimal Price { get; set; }
 
         public virtual List<Ingredient> Ingredients { get; set; }
 

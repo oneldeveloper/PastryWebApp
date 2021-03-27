@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PastryWebApp.Database.Entities
 {
-    public class Ingredient
+    public class Ingredient : IEntity
     {
         public int Id { get; set; }
         public int PastryId { get; set; }

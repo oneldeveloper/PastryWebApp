@@ -9,7 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PastryWebApp.Data;
 using PastryWebApp.Database;
+using PastryWebApp.Database.Entities;
 
 namespace PastryWebApp
 {
@@ -17,14 +19,33 @@ namespace PastryWebApp
     {
         public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
-            using (var serviceScope = host.Services.CreateScope())
+            bool resetDb = false;
+            if (args.Length > 0)
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<PastryDbContext>();
-                PastryDbUtils.Create(context);
+                if (args.Contains("resetDb"))
+                    resetDb = true;
 
             }
-            
+
+            var host = CreateHostBuilder(args).Build();
+            if(resetDb)
+            {
+                using (var serviceScope = host.Services.CreateScope())
+                {
+                    var pastryContext = serviceScope.ServiceProvider.GetRequiredService<PastryDbContext>();
+                    DbUtils.Create(pastryContext);
+
+                    PastryDemo.CreateTortaParadiso(pastryContext);
+                    PastryDemo.CreateTiramisu(pastryContext);
+                    PastryDemo.CreateCrostata(pastryContext);
+                    PastryDemo.CreateBavarese(pastryContext);
+                    
+
+
+                    var appContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    DbUtils.Create(appContext);
+                }
+            }         
             host.Run();
         }
 

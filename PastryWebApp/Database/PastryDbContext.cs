@@ -27,6 +27,10 @@ namespace PastryWebApp.Database
                     .ValueGeneratedOnAdd();
                     eb.Property(p => p.Name)
                     .IsRequired();
+                    eb.Property(p => p.Quantity)
+                    .IsRequired();
+                    eb.Property(p => p.Price)
+                    .IsRequired();
                 });
 
             modelBuilder.Entity<Ingredient>(
@@ -37,8 +41,6 @@ namespace PastryWebApp.Database
                     eb.Property(p=>p.Id)
                     .ValueGeneratedOnAdd();
                     eb.Property(p => p.Name)
-                    .IsRequired();
-                    eb.Property(p => p.MeasureUnit)
                     .IsRequired();
                 });
         }

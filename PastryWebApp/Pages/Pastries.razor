@@ -24,6 +24,10 @@
                 <input type="date" @bind-value="_newPastry.ProductionDate" />
             </td>
             <td>
+                <label>Prezzo di vendita:</label>
+                <input type="number" @bind-value="_newPastry.Price" />
+            </td>
+            <td>
                 <button class="btn btn-primary" @onclick="() => AddPastry()">
                     <span class="oi oi-plus" aria-hidden="true"></span>
                 </button>
@@ -39,8 +43,7 @@
         <tr class="card-header">
             <td class="text-center">Nome</td>
             <td class="text-center">Quantità</td>
-            <td class="text-center">Data produzione</td>
-            <td class="text-center">Condizioni di vendita</td>
+            <td class="text-center">Prezzo</td>
             <td></td>
             <td></td>
             <td></td>
@@ -50,18 +53,17 @@
             <tr>
                 <td class="text-center">@pastry.Name</td>
                 <td class="text-center">@pastry.Quantity</td>
-                <td class="text-center">@pastry.ProductionDate.ToString("dd/MM/yyyy")</td>
                 @if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(1))
                 {
-                    <td class="text-center">Prezzo pieno</td>
+                    <td class="text-center">@pastry.Price.ToString("N2") €</td>
                 }
                 else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(2))
                 {
-                    <td class="text-center">Scontato -20%</td>
+                    <td class="text-center">@((pastry.Price/100*80).ToString("N2")) € (-20%)</td>
                 }
                 else if (DateTime.Now - pastry.ProductionDate < TimeSpan.FromDays(3))
                 {
-                    <td class="text-center">Scontato 50%</td>
+                    <td class="text-center">@((pastry.Price/100*20).ToString("N2")) € (-80%)</td>
                 }
                 else
                 {
@@ -116,6 +118,11 @@
                     <input class="form-control" type="date"
                            placeholder="Data Produzione"
                            @bind="_editingPastry.ProductionDate" />
+                    <br />
+                    <label>Prezzo di vendita:</label>
+                    <input class="form-control" type="number"
+                           placeholder="Prezzo di vendita"
+                           @bind="_editingPastry.Price" />
                     <br />
                     <br />
                     <button class="btn btn-primary"
@@ -192,6 +199,7 @@
             Name = pastry.Name,
             Quantity = pastry.Quantity,
             ProductionDate = pastry.ProductionDate,
+            Price = pastry.Price,
             Ingredients = pastry.Ingredients
         };
     }
@@ -203,6 +211,7 @@
         item.Name = _editingPastry.Name;
         item.Quantity = _editingPastry.Quantity;
         item.ProductionDate = _editingPastry.ProductionDate;
+        item.Price = _editingPastry.Price;
         item.Ingredients = _editingPastry.Ingredients;
         ClosePopup();
     }

@@ -55,7 +55,13 @@ else
             {
                 <tr>
                     <td class="text-center">@ingredient.Name</td>
-                    <td class="text-center">@ingredient.Quantity @ingredient.MeasureUnit</td>
+                    <td class="text-center">
+                        @if (@ingredient.Quantity > 0)
+                        {
+                            @ingredient.Quantity.ToString("N0")
+                        }   
+                            @ingredient.MeasureUnit
+                        </td>
                     <td class="text-center">
                         <button class="btn btn-primary" @onclick="() => OpenEditPopup(ingredient)">
                             Edita
@@ -95,7 +101,7 @@ else
                                placeholder="Quantità"
                                @bind="_editingIngredient.Quantity" />
                         <br />
-                        <label>Unità di misuras:</label>
+                        <label>Unità di misura:</label>
                         <input class="form-control" type="text"
                                placeholder="Unità di misura"
                                @bind="_editingIngredient.MeasureUnit" />
@@ -177,7 +183,7 @@ else
     protected void OpenEditPopup(Ingredient ingredient)
     {
         _showEditPopup = true;
-        _editingIngredient = new Ingredient { Id = ingredient.Id, Name = ingredient.Name, Quantity = ingredient.Quantity, PastryId = ingredient.PastryId };
+        _editingIngredient = new Ingredient { Id = ingredient.Id, Name = ingredient.Name, Quantity = ingredient.Quantity, MeasureUnit=ingredient.MeasureUnit, PastryId = ingredient.PastryId };
     }
 
     protected void SaveAndClose()
