@@ -13,19 +13,19 @@
         <tr class="card-header">
             <td>
                 <label>Nome:</label>
-                <input type="text" @bind-value="_newPastry.Name" />
+                <input type="text" @onkeyup="@OnEnter" @bind-value="_newPastry.Name" />
             </td>
             <td>
                 <label>Quantità prodotta:</label>
-                <input type="number" @bind-value="_newPastry.Quantity" />
+                <input type="number" @onkeyup="@OnEnter" @bind-value="_newPastry.Quantity" />
             </td>
             <td>
                 <label>Data produzione:</label>
-                <input type="date" @bind-value="_newPastry.ProductionDate" />
+                <input type="date" @onkeyup="@OnEnter" @bind-value="_newPastry.ProductionDate" />
             </td>
             <td>
                 <label>Prezzo di vendita:</label>
-                <input type="number" @bind-value="_newPastry.Price" />
+                <input type="number" @onkeyup="@OnEnter" @bind-value="_newPastry.Price" />
             </td>
             <td>
                 <button class="btn btn-primary" @onclick="() => AddPastry()">
@@ -202,6 +202,12 @@
             Price = pastry.Price,
             Ingredients = pastry.Ingredients
         };
+    }
+
+    protected void OnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == ConsoleKey.Enter.ToString())
+            AddPastry();
     }
 
     protected void SaveAndClose()

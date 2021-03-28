@@ -39,11 +39,7 @@ namespace PastryWebApp
                     PastryDemo.CreateTiramisu(pastryContext);
                     PastryDemo.CreateCrostata(pastryContext);
                     PastryDemo.CreateBavarese(pastryContext);
-                    
 
-
-                    var appContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    DbUtils.Create(appContext);
                 }
             }         
             host.Run();
